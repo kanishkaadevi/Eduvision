@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduVision – Empowering Learning for the Visually Impaired</title>
+  <meta name="description" content="Assistive digital inclusion platform offering interactive Braille keyboard simulation, speech synthesis, real-time alt-text analysis, voice navigation, and inclusive learning portals.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- ==========================================================================
+         App Header & Global Accessibility Navigation Controls
+         ========================================================================== -->
+    <header class="app-header" role="banner">
+      <div class="brand-section">
+        <h1>EduVision</h1>
+        <span class="brand-badge" aria-label="Version 2.0 Alpha">Assistive OS</span>
+      </div>
+
+      <nav class="nav-controls" aria-label="Accessibility quick settings" role="navigation">
+        <!-- Soundscape Audio Feedback Switcher -->
+        <button id="muteBtn" onclick="const muted = Soundscape.toggleMute(); this.textContent = muted ? '🔇 Muted' : '🔊 Auditory Chimes'; this.className = muted ? 'a11y-btn' : 'a11y-btn active'; this.setAttribute('aria-label', muted ? 'Unmute chimes' : 'Mute chimes')" class="a11y-btn active" title="Toggle audio button clicks feedback">
+          🔊 Auditory Chimes
+        </button>
+
+        <!-- Dynamic Font Sizing -->
+        <div class="a11y-control-bar" role="group" aria-label="Text scale adjustment">
+          <button onclick="AppState.changeFontSize('down')" class="a11y-btn" aria-label="Decrease text size" title="Smaller Font">A-</button>
+          <button onclick="AppState.changeFontSize('up')" class="a11y-btn" aria-label="Increase text size" title="Larger Font">A+</button>
+        </div>
+
+        <!-- Atkinson Dyslexia Font Toggle -->
+        <button id="dyslexiaBtn" onclick="AppState.toggleDyslexicFont()" class="a11y-btn" aria-label="Toggle Atkinson Hyperlegible & OpenDyslexic spacing" title="Toggle highly readable font spacing">
+          🔤 Inclusive Spacing
+        </button>
+
+        <!-- Theme / High Contrast Options -->
+        <div class="a11y-control-bar" role="group" aria-label="Interface Contrast Selection">
+          <button class="a11y-btn theme-btn active" data-theme="dark" onclick="AppState.setTheme('dark')" aria-label="Switch to Glassmorphic Dark Theme">Dark</button>
+          <button class="a11y-btn theme-btn" data-theme="light" onclick="AppState.setTheme('light')" aria-label="Switch to High Contrast Light Theme">Light</button>
+          <button class="a11y-btn theme-btn" data-theme="high-contrast" onclick="AppState.setTheme('high-contrast')" aria-label="Switch to Ultra Contrast Black and Yellow Theme">Contrast 👁️</button>
+        </div>
+
+        <!-- Sync Status Widget -->
+        <div id="syncStatus" class="cloud-sync-status" aria-live="polite">
+          <div class="sync-dot"></div> Live Cloud Synced
+        </div>
+      </nav>
+    </header>
+
+    <!-- Screen Reader live accessibility transcript panel -->
+    <div id="srCaption" class="screen-reader-caption" role="status" aria-live="assertive" aria-label="Auditory navigation reader announcements">
+      <span>🔊</span> Welcome to EduVision! Press "🔤 Inclusive Spacing" or "Contrast 👁️" above to calibrate your workspace. Speak "help" anytime.
+    </div>
+
+    <!-- ==========================================================================
+         Main Responsive Grid Layout Workspace
+         ========================================================================== -->
+    <main class="app-grid" role="main">
+      
+      <!-- ==========================================================================
+           LEFT COLUMN: Voice Navigation, Braille Simulator, AI Tutor
+           ========================================================================== -->
+      <section class="card-column" aria-label="Tactile Inputs and Voice Guidance Controls">
+        
+        <!-- 1. Voice Guidance & Continuous Listening Hub -->
+        <div class="glass-card" id="voiceControlHub">
+          <div class="card-header">
+            <h2>🎙️ Voice Guided Navigation</h2>
+            <span class="brand-badge" style="color: var(--accent-secondary); border-color: var(--accent-secondary); background: transparent;">STT Core</span>
+          </div>
+          
+          <div class="voice-command-bar">
+            <div class="voice-status-group">
+              <button id="micButton" onclick="SpeechEngine.toggleListening()" class="mic-button" aria-label="Toggle continuous voice recognition" title="Click to talk or dictate">
+                🎙️
+              </button>
+              <div>
+                <div style="font-weight: 700; font-size: 0.95rem;">Hands-Free Mode</div>
+                <p id="micStatusText" style="font-size: 0.75rem; color: var(--text-muted);">Voice controls offline. Click microphone to begin.</p>
+              </div>
+            </div>
+          </div>
+
+          <p style="font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; color: var(--text-primary);">Vocal Commands Quick Reference Guide:</p>
+          <div class="voice-cue-list" role="list">
+            <div onclick="SpeechEngine.parseVoiceCommand('help')" class="voice-cue" role="listitem">"help"</div>
+            <div onclick="SpeechEngine.parseVoiceCommand('open editor')" class="voice-cue" role="listitem">"open editor"</div>
+            <div onclick="SpeechEngine.parseVoiceCommand('read note')" class="voice-cue" role="listitem">"read note"</div>
+            <div onclick="SpeechEngine.parseVoiceCommand('high contrast')" class="voice-cue" role="listitem">"high contrast"</div>
+            <div onclick="SpeechEngine.parseVoiceCommand('save document')" class="voice-cue" role="listitem">"save document"</div>
+            <div onclick="SpeechEngine.parseVoiceCommand('ask assistant')" class="voice-cue" role="listitem">"ask assistant"</div>
+          </div>
+        </div>
+
+        <!-- 2. Bluetooth Braille Keyboard Simulator -->
+        <div class="glass-card" id="brailleSimulatorCard">
+          <div class="card-header">
+            <h2>⌨️ Braille Keyboard Simulator</h2>
+            <button onclick="TTSEngine.speak('Map keys F D S to dots 1 2 3 and J K L to dots 4 5 6 on your physical keyboard to type! Spacebar inserts blank, Backspace deletes.')" class="secondary-btn" style="padding: 4px 10px; font-size: 0.75rem;" aria-label="Read Braille key bindings configuration">
+              Help ?
+            </button>
+          </div>
+          
+          <div class="braille-workspace">
+            <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">
+              Simulates a hardware **Perkins Braille Keyboard**. Click dots below to activate dot cells, or type via physical keys 
+              (<kbd>F</kbd>, <kbd>D</kbd>, <kbd>S</kbd> for dots 1-3 | <kbd>J</kbd>, <kbd>K</kbd>, <kbd>L</kbd> for dots 4-6) simultaneously.
+            </p>
+
+            <!-- 6 Interactive Braille Dot Cells -->
+            <div class="braille-cell-interactive" id="brailleInteractiveCell" role="region" aria-label="Interactive 6-dot Braille Cell simulator grid">
+              <!-- Rendered dynamically by app.js -->
+            </div>
+
+            <!-- Active Combination Indicator & Submit Button -->
+            <div class="braille-input-log">
+              <span id="currentBrailleState" style="font-weight: 700; color: var(--accent-primary);" aria-live="polite">Dots Active: None</span>
+              <button onclick="BrailleSim.submitActiveDotCombination()" class="primary-btn" style="padding: 6px 14px; font-size: 0.8rem;" aria-label="Submit active Braille combination to editor">
+                Submit Cell (SPACE)
+              </button>
+            </div>
+
+            <div class="keyboard-sim-tip">
+              💡 <strong>Braille Quick Learning Reference:</strong> A=[1], B=[1,2], C=[1,4], D=[1,4,5], E=[1,5], L=[1,2,3], Z=[1,3,5,6]
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. AI Tutor Assistant & Tacit Alt Tag Image Analyzer -->
+        <div class="glass-card" id="aiChatbotCard">
+          <div class="card-header">
+            <h2>🤖 AI Learning Assistant & Computer Vision</h2>
+            <span class="brand-badge" style="color: var(--accent-glow-teal); border-color: var(--accent-secondary); color: var(--accent-secondary);">OpenAI v4 Mock</span>
+          </div>
+
+          <!-- Chat logs panel -->
+          <div class="ai-chat-box" id="chatLogs" role="log" aria-label="Chat messages dashboard">
+            <div class="chat-bubble assistant">
+              Hello! I am your 24/7 EduVision AI Coach. I can help explain conceptual details, insert structured charts, generate tactile alt-text, or translate files. Try asking me "braille", "diagram", or "translate"!
+            </div>
+          </div>
+
+          <!-- Ask chatbot inputs row -->
+          <div class="chat-input-row">
+            <input type="text" id="chatInput" class="app-input" placeholder="Ask study tutor..." aria-label="Ask AI Assistant Input" onkeydown="if(event.key === 'Enter') AIChatbot.askAI()">
+            <button onclick="AIChatbot.askAI()" class="primary-btn" aria-label="Send query to AI tutor">Ask AI</button>
+          </div>
+
+          <!-- Labeled Image Computer-Vision analyzer drag-drop mock -->
+          <input type="file" id="imagePicker" style="display: none;" accept="image/*" onchange="AIChatbot.handleImageUpload(this.files)">
+          <div onclick="AIChatbot.triggerAltTextAnalyzer()" class="alt-text-analyzer" role="button" aria-label="Upload educational diagram to generate descriptive tactile alt text tags">
+            <div style="font-size: 1.5rem; margin-bottom: 4px;">📷</div>
+            <div style="font-weight: 700; font-size: 0.85rem; color: var(--accent-secondary);">Tactile Alt-Text Generator & Diagram Scanner</div>
+            <p style="margin-top: 2px;">Click to upload academic diagrams or references to write detailed descriptive visual labels</p>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ==========================================================================
+           RIGHT COLUMN: Accessible Document Workspace, Collaboration, Diagnostics
+           ========================================================================== -->
+      <section class="card-column" aria-label="Structured Notes Workspace and Diagnostic Utilities">
+        
+        <!-- 4. Document Editor Core Panel -->
+        <div class="glass-card" id="documentWorkspaceCard">
+          <div class="card-header">
+            <h2>📝 Accessible Notes Workspace</h2>
+            <div class="a11y-control-bar" style="background: transparent; border: none; padding: 0;">
+              <!-- Document translation selects -->
+              <select onchange="AIChatbot.translateDocument(this.value); this.value = '';" class="app-input" style="padding: 4px 10px; font-size: 0.75rem; max-width: 140px; border-radius: var(--radius-sm);" aria-label="Translate document language">
+                <option value="">🌐 Translate...</option>
+                <option value="es">Spanish (Español)</option>
+                <option value="fr">French (Français)</option>
+                <option value="hi">Hindi (हिन्दी)</option>
+                <option value="de">German (Deutsch)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="editor-box">
+            <!-- Text Aloud Synchronized Highlighter Panel Overlay -->
+            <div style="position: relative; width: 100%;">
+              <div id="editorHighlightWrapper" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 240px; background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; overflow-y: auto; white-space: pre-wrap; font-family: var(--font-family); font-size: 1.05rem; line-height: 1.6; pointer-events: none; z-index: 5;"></div>
+              
+              <textarea id="editorTextarea" class="accessible-textarea" placeholder="Type your educational material here using normal typing or click 'Braille Keyboard Simulator' to use tactile cells. Your draft auto-saves instantly..." aria-label="Accessible Document Editor Workspace Notes content" oninput="DocumentManager.handleEditorInput()"></textarea>
+            </div>
+
+            <!-- Metrical Indicators -->
+            <div class="editor-status-bar">
+              <span id="wordCountLabel" style="font-weight: 700;">Words: 0</span>
+              <span id="charCountLabel" style="font-weight: 700;">Characters: 0</span>
+            </div>
+
+            <!-- Speech Config Voice Synthesizer Controls -->
+            <div style="background: rgba(0,0,0,0.15); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.8rem 1.2rem; display: flex; flex-direction: column; gap: 8px;">
+              <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;">
+                <label for="voiceSelect" style="font-weight: 700; font-size: 0.8rem; color: var(--text-secondary);">TTS Voice Reader Engine:</label>
+                <select id="voiceSelect" class="app-input" style="padding: 4px 8px; font-size: 0.75rem; border-radius: var(--radius-sm); max-width: 250px;" aria-label="Select Text-To-Speech Narrator voice profile"></select>
+              </div>
+
+              <!-- Speed and Pitch Sliders -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 4px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <label for="ttsSpeedSlider" style="font-size: 0.75rem; font-weight: 600; min-width: 50px;">Speed:</label>
+                  <input type="range" id="ttsSpeedSlider" min="0.5" max="2.0" step="0.1" value="1.0" style="flex:1;" aria-label="Text-To-Speech Read back Speed slider">
+                  <span id="speedVal" style="font-size: 0.75rem; font-weight: 700;">1.0x</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <label for="ttsPitchSlider" style="font-size: 0.75rem; font-weight: 600; min-width: 40px;">Pitch:</label>
+                  <input type="range" id="ttsPitchSlider" min="0.5" max="1.5" step="0.1" value="1.0" style="flex:1;" aria-label="Text-To-Speech pitch modifier slider">
+                  <span id="pitchVal" style="font-size: 0.75rem; font-weight: 700;">1.0</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Primary Action Buttons Row -->
+            <div class="editor-actions">
+              <button onclick="TTSEngine.speak(document.getElementById('editorTextarea').value, 'editorTextarea')" class="primary-btn" aria-label="Read active document text aloud using synchronized speech engine">
+                🔊 Read Aloud (Ctrl+R)
+              </button>
+              <button onclick="TTSEngine.cancel()" class="secondary-btn" aria-label="Stop reading text aloud">
+                🛑 Stop Speech
+              </button>
+              <button onclick="DocumentManager.saveDocument()" class="primary-btn" style="background: var(--success); border-color: var(--success);" aria-label="Save document content to cloud local backup">
+                💾 Save Document
+              </button>
+              <button onclick="DocumentManager.exportDocumentTXT()" class="secondary-btn" aria-label="Export notes document as plain text TXT file">
+                📄 Export TXT
+              </button>
+              <button onclick="DocumentManager.exportDocumentPDF()" class="secondary-btn" aria-label="Export document structured layout to print or compile clean PDF">
+                🖨️ Export PDF
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. Dual Blind-Sighted Collaboration suite preview -->
+        <div class="glass-card" id="collabSuiteCard">
+          <div class="card-header">
+            <h2>🤝 Sighted-Blind Collaboration Hub</h2>
+          </div>
+
+          <p style="font-size: 0.85rem; margin-bottom: 0.75rem;">
+            Real-time interactive portal translating between visual syntax format and tactile Braille cells instantly.
+          </p>
+
+          <!-- Navigation Switch buttons -->
+          <div class="panel-switch-row" role="tablist">
+            <button id="collabBtnSighted" onclick="switchCollabPane('sighted')" class="panel-switch-btn active" role="tab" aria-selected="true" aria-controls="sightedPreviewPanel">
+              👓 Sighted User View (Markdown + Diagrams)
+            </button>
+            <button id="collabBtnBlind" onclick="switchCollabPane('blind')" class="panel-switch-btn" role="tab" aria-selected="false" aria-controls="blindPreviewPanel">
+              ⠃ Tactile Braille Preview Grid
+            </button>
+          </div>
+
+          <!-- Sighted View Panel (Rendered layout, graphs) -->
+          <div id="sightedPreviewPanel" class="preview-rendered" role="tabpanel" aria-label="Rendered layout view with structural code tags">
+            <p style="color: var(--text-muted); font-style: italic;">No document text. Start typing above to compile structural previews...</p>
+          </div>
+
+          <!-- Blind View Panel (Tactile symbols, structural overview) -->
+          <div id="blindPreviewPanel" class="preview-tactile" style="display: none;" role="tabpanel" aria-label="Interactive translated Braille character cells board">
+            <p style="color: var(--text-muted); font-style: italic;">No Braille compiled yet...</p>
+          </div>
+        </div>
+
+        <!-- 6. Real-time WCAG 2.1 AAA Accessibility Diagnostics -->
+        <div class="glass-card" id="wcagConsoleCard">
+          <div class="card-header">
+            <h2>🛡️ Built-in WCAG 2.1 AAA Accessibility Diagnostics</h2>
+            <span class="brand-badge" style="background: rgba(16, 185, 129, 0.15); border-color: var(--success); color: var(--success);">Auto Audit Active</span>
+          </div>
+          
+          <div class="wcag-diagnostics">
+            <div class="diagnostics-header">
+              <span>Dynamic Contrast & Document Structure Auditing</span>
+              <span style="font-size: 0.75rem; color: var(--text-muted);">Standard: WCAG 2.1 Section 508</span>
+            </div>
+            
+            <!-- Checks container -->
+            <div id="wcagDiagnosticContainer">
+              <!-- Built dynamically by app.js -->
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Footer Area -->
+    <footer style="margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; text-align: center; font-size: 0.8rem; color: var(--text-muted);">
+      <p>EduVision – Assistive Digital Inclusion Workspace. Engineered under Sustainable Development Goals (SDGs) & digital inclusion principles.</p>
+    </footer>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
